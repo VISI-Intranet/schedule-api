@@ -3,12 +3,11 @@ package repository
 import scala.concurrent.Future
 import scala.collection.JavaConverters._
 import collection.MongoDBConnection
-import collection.MongoDBConnection._
 import model._
 import org.mongodb.scala.Document
-import org.mongodb.scala.bson.{BsonArray, BsonDocument, BsonString, ObjectId}
+import org.mongodb.scala.bson.{BsonDocument, BsonString}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.util.Try
 
@@ -39,7 +38,8 @@ object ScheduleRepository {
             semestr = doc.getString("semestr"),
             dayOfWeek = doc.getString("dayOfWeek"),
             startTime = doc.getString("startTime"),
-            endTime = doc.getString("endTime")
+            endTime = doc.getString("endTime"),
+            prosessorName = doc.getString("prosessoName")
           )
         }.toList // Преобразование Seq в List
       }.getOrElse(List.empty)
@@ -61,7 +61,8 @@ object ScheduleRepository {
             semestr = doc.getString("semestr"),
             dayOfWeek = doc.getString("dayOfWeek"),
             startTime = doc.getString("startTime"),
-            endTime = doc.getString("endTime")
+            endTime = doc.getString("endTime"),
+            prosessorName = doc.getString("prosessorName")
           )
         )
       case None => None
@@ -78,7 +79,8 @@ object ScheduleRepository {
       "semestr" -> BsonString(schedule.semestr),
       "dayOfWeek" -> BsonString(schedule.dayOfWeek),
       "startTime" -> BsonString(schedule.startTime),
-      "endTime" -> BsonString(schedule.endTime)
+      "endTime" -> BsonString(schedule.endTime),
+      "proseesorName"-> BsonString(schedule.prosessorName)
     )
 
     MongoDBConnection.scheduleCollection.insertOne(scheduleDocument).toFuture().map(_ => s"Schedule with ID ${schedule.scheduleId} has been added to the database.")
@@ -133,7 +135,8 @@ object ScheduleRepository {
             semestr = doc.getString("semestr"),
             dayOfWeek = doc.getString("dayOfWeek"),
             startTime = doc.getString("startTime"),
-            endTime = doc.getString("endTime")
+            endTime = doc.getString("endTime"),
+            prosessorName = doc.getString("prosessorName")
           )
         }.toList
       }

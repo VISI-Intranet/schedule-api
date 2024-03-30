@@ -1,7 +1,5 @@
 package collection
 
-
-
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase}
 
 
