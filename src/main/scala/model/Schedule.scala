@@ -10,5 +10,6 @@ case class Schedule(
                      dayOfWeek: String,
                      startTime: String,
                      endTime: String,
-                     semestr: String
+                     semestr: String,
+                     var prosessorName: String
                    )
