@@ -1,6 +1,6 @@
 package route
 
-import Scala.Main
+import Main.Main
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.util.Timeout

@@ -1,3 +1,5 @@
+package Main
+
 import akka.actor.{ActorSystem, Props}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
@@ -6,7 +8,12 @@ import com.typesafe.config.ConfigFactory
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 import org.json4s.{DefaultFormats, jackson}
 import route.ScheduleRoutes
-import routing.RabbitMQ_Consumer
+import route.RabbitMQ_Consumer
+import akka.http.scaladsl.server.Directives._
+import RabbitMQ._
+import scala.concurrent.{ExecutionContextExecutor, Future}
+import route._
+
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
@@ -24,29 +31,23 @@ object Main {
   implicit val serialization = jackson.Serialization
   implicit val formats = DefaultFormats
 
-
   val amqpActor = system.actorOf(Props(new AmqpActor("X:routing.topic", serviceName)), "amqpActor")
-  amqpActor ! RabbitMQ.DeclareListener("schedule_api_queue","univer.schedule_api.#","Akka_name",RabbitMQ_Consumer.handle)
+  amqpActor ! RabbitMQ.DeclareListener("schedule_api_queue", "univer.schedule_api.#", "Akka_name", RabbitMQ_Consumer.handle)
+
 
   def main(args: Array[String]): Unit = {
+
     val Routes = ScheduleRoutes.route
 
-    val bindingFuture = Http().bindAndHandle(Routes, "localhost", 8080)
+    val bindingFuture = Http().bindAndHandle(Routes, "localhost", 8081)
 
-    println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
-
-
-
-   // amqpActor ! RabbitMQ.DeclareListener("shedule_api_queue", s"univer.$serviceName.#", "consumer_actor_1", RabbitMQ_Consumer.handle)
-
-
+    println(s"Server online at http://localhost:8081/\nPress RETURN to stop...")
 
     sys.addShutdownHook {
       bindingFuture
         .flatMap(_.unbind())
         .onComplete(_ => system.terminate())
     }
-
   }
 }
 
