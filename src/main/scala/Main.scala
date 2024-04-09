@@ -1,3 +1,4 @@
+package Scala
 import akka.actor.{ActorSystem, Props}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
@@ -6,7 +7,7 @@ import com.typesafe.config.ConfigFactory
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 import org.json4s.{DefaultFormats, jackson}
 import route.ScheduleRoutes
-import routing.RabbitMQ_Consumer
+import route.RabbitMQ_Consumer
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn

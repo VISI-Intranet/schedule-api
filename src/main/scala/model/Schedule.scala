@@ -6,10 +6,12 @@ case class Schedule(
                      scheduleId: String,
                      courseId: List[String],
                      professorId: List[String],
+                     disciplineId:List[String],
                      roomId: List[String],
                      dayOfWeek: String,
                      startTime: String,
                      endTime: String,
                      semestr: String,
-                     var prosessorName: String
+                     var prosessorName: String,
+                     disciplineName: Option[String],
                    )

@@ -6,7 +6,7 @@ ThisBuild / scalaVersion := "2.13.12"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "University Schedule"
+    name := "schedule-api"
   )
 
 libraryDependencies ++= Seq(

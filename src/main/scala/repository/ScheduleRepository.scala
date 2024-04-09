@@ -32,6 +32,9 @@ object ScheduleRepository {
             professorId = Option(doc.get("professorId")).collect {
               case list: java.util.List[BsonString] => list.asScala.map(_.getValue).toList
             }.getOrElse(List.empty[String]),
+            disciplineId = Option(doc.get("disciplineId")).collect {
+              case list: java.util.List[BsonString] => list.asScala.map(_.getValue).toList
+            }.getOrElse(List.empty[String]),
             roomId = Option(doc.get("roomId")).collect {
               case list: java.util.List[BsonString] => list.asScala.map(_.getValue).toList
             }.getOrElse(List.empty[String]),
@@ -39,7 +42,8 @@ object ScheduleRepository {
             dayOfWeek = doc.getString("dayOfWeek"),
             startTime = doc.getString("startTime"),
             endTime = doc.getString("endTime"),
-            prosessorName = doc.getString("prosessoName")
+            prosessorName = doc.getString("prosessoName"),
+            disciplineName= None
           )
         }.toList // Преобразование Seq в List
       }.getOrElse(List.empty)
@@ -57,12 +61,14 @@ object ScheduleRepository {
             scheduleId = doc.getString("scheduleId").toString,
             courseId = Option(doc.getList("courseId", classOf[String])).map(_.asScala.toList).getOrElse(List.empty),
             professorId = Option(doc.getList("professorId", classOf[String])).map(_.asScala.toList).getOrElse(List.empty),
+            disciplineId = Option(doc.getList("disciplineId", classOf[String])).map(_.asScala.toList).getOrElse(List.empty),
             roomId = Option(doc.getList("roomId", classOf[String])).map(_.asScala.toList).getOrElse(List.empty),
             semestr = doc.getString("semestr"),
             dayOfWeek = doc.getString("dayOfWeek"),
             startTime = doc.getString("startTime"),
             endTime = doc.getString("endTime"),
-            prosessorName = doc.getString("prosessorName")
+            prosessorName = doc.getString("prosessorName"),
+            disciplineName = None
           )
         )
       case None => None
@@ -75,12 +81,13 @@ object ScheduleRepository {
       "scheduleId" -> Option(schedule.scheduleId),
       "courseId" -> Option(schedule.courseId.map(BsonString(_))),
       "professorId" -> Option(schedule.professorId.map(BsonString(_))),
+      "disciplineId" -> Option(schedule.disciplineId.map(BsonString(_))),
       "roomId" -> Option(schedule.roomId.map(BsonString(_))),
       "semestr" -> BsonString(schedule.semestr),
       "dayOfWeek" -> BsonString(schedule.dayOfWeek),
       "startTime" -> BsonString(schedule.startTime),
       "endTime" -> BsonString(schedule.endTime),
-      "proseesorName"-> BsonString(schedule.prosessorName)
+      "proseesorName"-> BsonString(schedule.prosessorName),
     )
 
     MongoDBConnection.scheduleCollection.insertOne(scheduleDocument).toFuture().map(_ => s"Schedule with ID ${schedule.scheduleId} has been added to the database.")
@@ -131,12 +138,14 @@ object ScheduleRepository {
             scheduleId = doc.getString("scheduleId").toString,
             courseId = Option(doc.getList("courseId", classOf[String])).map(_.asScala.toList).getOrElse(List.empty),
             professorId = Option(doc.getList("professorId", classOf[String])).map(_.asScala.toList).getOrElse(List.empty),
+            disciplineId = Option(doc.getList("disciplineId", classOf[String])).map(_.asScala.toList).getOrElse(List.empty),
             roomId = Option(doc.getList("roomId", classOf[String])).map(_.asScala.toList).getOrElse(List.empty),
             semestr = doc.getString("semestr"),
             dayOfWeek = doc.getString("dayOfWeek"),
             startTime = doc.getString("startTime"),
             endTime = doc.getString("endTime"),
-            prosessorName = doc.getString("prosessorName")
+            prosessorName = doc.getString("prosessorName"),
+            disciplineName = None
           )
         }.toList
       }

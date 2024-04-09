@@ -10,7 +10,7 @@ import repository.ScheduleRepository
 import model.Schedule
 import amqp._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scala.util.Success
@@ -35,7 +35,7 @@ object ScheduleRoutes extends Json4sSupport {
             },
             post {
               entity(as[Schedule]) { schedule =>
-                val future = (Main.amqpActor ? RabbitMQ.Ask("univer.teacher_api.getTeacherName",schedule.professorId(0))).mapTo[String]
+                val future = (Main.amqpActor ? RabbitMQ.Ask("univer.teacher_api.getTeacherName", schedule.professorId(0))).mapTo[String]
                 onComplete(future) {
                   case Success(value) => {
                     schedule.prosessorName = value
@@ -50,6 +50,7 @@ object ScheduleRoutes extends Json4sSupport {
         path(Segment) { scheduleId =>
           concat(
             get {
+
               complete(ScheduleRepository.getScheduleById(scheduleId))
             },
             put {
@@ -63,7 +64,35 @@ object ScheduleRoutes extends Json4sSupport {
           )
         }
       )
+    }~
+      pathPrefix("scheduleGetDiscipline") {
+        path(Segment) { scheduleId =>
+      concat(
+        get {
+          val futureSchedule: Future[Option[Schedule]] = ScheduleRepository.getScheduleById(scheduleId)
+          val resultFuture: Future[Option[Schedule]]= futureSchedule.flatMap {
+            case Some(schedule) =>
+              val futures = (Main.amqpActor ? RabbitMQ.Ask("univer.discipline_api.getDisciplineName", schedule.disciplineId(0))).mapTo[String]
+              futures.map { result =>
+                println("Результат в виде строки " + result)
+
+                val resultList = result.stripPrefix("List(").stripSuffix(")").split(",").map(_.trim).map(_.stripPrefix("Some(").stripSuffix(")")).toList
+
+                // Объединяем элементы списка в одну строку, разделенную разделителем
+                val disciplineNameString = resultList.mkString(", ")
+
+                val updatedSchedule = schedule.copy(disciplineName = Some(disciplineNameString))
+
+                Some(updatedSchedule)
+              }
+          }
+          onSuccess(resultFuture){
+            case Some(discipline)=> complete(discipline)
+          }
+        },
+      )
     }
+  }
 }
 
 

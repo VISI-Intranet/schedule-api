@@ -1,7 +1,8 @@
 package amqp
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
-import com.rabbitmq.client.{Channel, Connection, ConnectionFactory}
+import com.rabbitmq.client._
+import scala.collection.mutable
 
 class AmqpActor(exchangeName: String,serviceName:String) extends Actor with ActorLogging {
   private var connection: Connection = _
@@ -23,7 +24,7 @@ class AmqpActor(exchangeName: String,serviceName:String) extends Actor with Acto
     channel = connection.createChannel()
     log.info("Соединение с RabbitMQ установлено")
 
-    senderActor = context.actorOf(SenderActor.props(channel,exchangeName), "sender")
+    senderActor = context.actorOf(SenderActor.props(channel,exchangeName,serviceName), "sender")
     askerActor = context.actorOf(AskActor.props(channel,exchangeName, serviceName), "asker")
   }
 
@@ -39,10 +40,14 @@ class AmqpActor(exchangeName: String,serviceName:String) extends Actor with Acto
       // Запрос передаем дальше
       askerActor forward msg
 
-    case RabbitMQ.DeclareListener(queue,bind_routing_key,actorName, handle) =>
+    case RabbitMQ.DeclareListener(queue,bind_routing_key,actorName, handle) => {
+      // Создаем для актора новый канал
+      val chanelForReceiver = connection.createChannel()
       // Создаем актора слушателья
-      context.actorOf(ReceiverActor.props(channel,queue,exchangeName,bind_routing_key,handle),actorName)
+      val receiverActor = context.actorOf(ReceiverActor.props(chanelForReceiver, queue, exchangeName, bind_routing_key, handle), actorName)
+    }
   }
+
 
   override def postStop(): Unit = {
     // Закрываем соединение с RabbitMQ
